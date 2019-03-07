@@ -9,22 +9,26 @@ function PromiseComplete(handle){
     this.onResloveCallbacks = [];
     this.onRejectCallbacks = [];
     const reslove = (value) => {
-        if(this.state === 'pending'){
-            this.state = 'reslove';
-            this.value = value;
-            this.onResloveCallbacks.forEach(fn => {
-                fn();
-            })
-        }
+        setTimeout(()=>{
+            if(this.state === 'pending'){
+                this.state = 'reslove';
+                this.value = value;
+                this.onResloveCallbacks.forEach(fn => {
+                    fn();
+                })
+            }
+        },0)
     }
     const reject = (reason) => {
-        if(this.state == 'pending'){
-            this.state = 'reject';
-            this.reason = reason;
-            this.onRejectCallbacks.forEach(fn => {
-                fn();
-            })
-        }
+        setTimeout(()=>{
+            if(this.state == 'pending'){
+                this.state = 'reject';
+                this.reason = reason;
+                this.onRejectCallbacks.forEach(fn => {
+                    fn();
+                })
+            }
+        },0)
     }
     try{
         handle(reslove,reject)
@@ -84,15 +88,9 @@ const promiseReslove = (promise,x,reslove,reject) => {
         return reject(new TypeError("循环引用"))
     }
     if(x instanceof PromiseComplete){
-        if(x.state == 'pending'){
-            console.log(x.state)
-            x.then((value => {
-                x.then(promiseReslove(promise,value,reslove,reject))
-            }),reject)
-        }else{
-            console.log(x.state)
-            x.then(reslove,reject)
-        }
+        x.then((value => {
+            promiseReslove(promise,value,reslove,reject)
+        }),reject)
         return
     }
     if(x!== null&&(typeof x === 'object'||typeof x === 'function')){
@@ -114,7 +112,7 @@ const promiseReslove = (promise,x,reslove,reject) => {
         }catch(e){
             if(isCalled) return;
             isCalled = true;
-            reslove(e)
+            reject(e)
         }
     }else{
         reslove(x)

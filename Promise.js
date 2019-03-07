@@ -20,6 +20,9 @@ function Promise(handle){
     }
     handle(this.reslove,this.reject)
 }
+/**
+ * @param
+ */
 Promise.prototype.then = function(onReslove,onReject = undefined){
     if(this.state === 'reslove'){
         onReslove(this.value)
